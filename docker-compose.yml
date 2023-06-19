@@ -1,0 +1,41 @@
+#----------------------------------------------------------------------------#
+# Instructions on how to get the Postgress Docker Container Running:         #
+#                                                                            #
+#   Ensure that Docker is installed and running.                             #
+#   Open a new terminal.                                                     #
+#   Ensure that you are logged in to you docker account.                     #
+#     - To log in, enter the following command:                              #
+#       - `docker login -u {username} -p {password}`                         #
+#       - replace the bracket with corresponding credentials.                #
+#         - Example: `docker login -u user88 -p supersecretpassword123`      #
+#   Once logged in, run the command:                                         #
+#     - `docker-compose up`                                                  #
+#     To run the postgres container in the background run:                   #
+#       - `docker-compose up -d`                                             #
+#   Run `docker ps` to view and confirm the postgres container is running.   #
+#   Run `docker-compose stop` to stop the postgres container running         #
+#     in the background.                                                     #
+#                                                                            #
+# Here is a link to more information about the Postgres Docker Image:        #
+#   https://hub.docker.com/_/postgres                                        #
+#                                                                            #
+#   Once the Postgres Docker container is running, run the command:          #
+#     `psql -h 127.0.0.1 -p 5432 -U actix actix < database.sql`              #
+#     to set up the todo_list and todo_item tables and insert test data.     #
+#   Run the command:                                                         #
+#     `psql -h 127.0.0.1 -p 5432 -U actix actix` to connect to postgress.    #
+#   Type `actix` as the password to login as the user actix.                 #
+#   Then run `\d` to view the list of relations.                             #
+#----------------------------------------------------------------------------#
+
+version: "3.1"
+services:
+  postgres:
+    image: postgres:11-alpine
+    restart: always
+    environment:
+      POSTGRES_PASSWORD: actix
+      POSTGRES_USER: actix
+      POSTGRES_DB: actix
+    ports:
+      - 5432:5432

@@ -3,7 +3,8 @@ use tokio_pg_mapper_derive::PostgresMapper;
 
 #[derive(Serialize)]
 pub struct Status {
-    pub status: String
+    pub status: String,
+    pub message: String,
 }
 
 #[derive(Serialize, Deserialize, PostgresMapper)]
@@ -20,4 +21,14 @@ pub struct TodoItem {
     pub title: String,
     pub checked: bool,
     pub list_id: i32,
+}
+
+#[derive(Deserialize)]
+pub struct CreateTodoList {
+    pub title: String,
+}
+
+#[derive(Serialize)]
+pub struct ResultResponse {
+    pub success: bool
 }

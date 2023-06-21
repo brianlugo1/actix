@@ -1,5 +1,6 @@
 #----------------------------------------------------------------------------#
-# Instructions on how to get the Postgress Docker Container Running:         #
+# Instructions on how to get the Postgress and Rust Docker Containers        #
+#   Running:                                                                 #
 #                                                                            #
 #   Ensure that Docker is installed and running.                             #
 #   Open a new terminal.                                                     #
@@ -10,23 +11,80 @@
 #         - Example: `docker login -u user88 -p supersecretpassword123`      #
 #   Once logged in, run the command:                                         #
 #     - `docker-compose up`                                                  #
-#     To run the postgres container in the background run:                   #
+#     To run the both containers in the background run:                      #
 #       - `docker-compose up -d`                                             #
-#   Run `docker ps` to view and confirm the postgres container is running.   #
-#   Run `docker-compose stop` to stop the postgres container running         #
-#     in the background.                                                     #
+#   Run `docker ps` to view and confirm the two containers are running.      #
+#   Run `docker ps -a` to view all existing containers.                      #
+#   Run `docker-compose stop` to stop both containers running in the         #
+#     background.                                                            #
 #                                                                            #
 # Here is a link to more information about the Postgres Docker Image:        #
 #   https://hub.docker.com/_/postgres                                        #
 #                                                                            #
-#   Once the Postgres Docker container is running, run the command:          #
-#     `psql -h 127.0.0.1 -p 5432 -U actix actix < database.sql`              #
-#     to set up the todo_list and todo_item tables and insert test data.     #
-#   Run the command:                                                         #
-#     `psql -h 127.0.0.1 -p 5432 -U actix actix` to connect to postgress.    #
-#   Type `actix` as the password to login as the user actix.                 #
-#   Then run `\d` to view the list of relations.                             #
+# Here is a link to more information about the Rust Docker Image:            #
+#   https://hub.docker.com/_/rust                                            #
+#                                                                            #
 #----------------------------------------------------------------------------#
+
+#-----------------------------------------------------------------------#
+# Different Commands I learned when developing this docker-compose      #
+#   file!                                                               #
+# `docker-compose build`                                                #
+#       - runs the docker-compose.yml file in the current               #
+#           directory to build specified docker images                  #
+# `docker-compose build --pull`                                         #
+#       - runs the docker-compose.yml file in the current               #
+#           directory, specifing to pull remote docker images           #
+#           with the `--pull` flage before building                     #
+# `docker-compose build --pull --no-cache`                              #
+#       - runs the docker-compose.yml file in the current               #
+#           directory, specifing to pull remote docker images           #
+#           with the `--pull` flag before building, ignoring            #
+#           any already catched docker images with the `--no-cache`     #
+#           flag                                                        #
+#   - `docker-compose up`                                               #
+#       - runs the docker-compose.yml file in the current               #
+#           directory                                                   #
+#           - a docker-compose.yml file containes configurations        #
+#               of specified docker containers to create and run,       #
+#               specifing where to find the corresponding docker        #
+#               images from which to build the docker containers        #
+#               or existing docker images hosted on Docker hub          #
+#   - `docker-compose up --build`                                       #
+#       - runs the docker-compose.yml file in the current               #
+#           directory, specifing to rebuild the docker images with      #
+#           the `--build` flag, regardless of cached docker images      #
+#   - `docker-compose up -d`                                            #
+#       - runs the docker-compose.yml file in the current               #
+#           directory, specifing the `-d` flag to run the docker        #
+#           containers in the background                                #
+#   - `docker-compose up -d --build`                                    #
+#       - runs the docker-compose.yml file in the current               #
+#           directory, specifing the `-d` flag to run the docker        #
+#           containers in the background and specifing to rebuild       #
+#           the docker images with the `--build` flag, regardless of    #
+#           cached docker images                                        #
+#   - `docker-compose up -d --remove-orphans`                           #
+#       - runs the docker-compose.yml file in the current               #
+#           directory, specifing the `--remove-orphans` flag to         #
+#           remove existing docker containers that are no longer        #
+#           specified in the docker-compose.yml file                    #
+#   - `docker-compose stop`                                             #
+#       - stops all docker containers running in the background         #
+#   - `docker ps`                                                       #
+#       - displays all running docker containers                        #
+#   - `docker ps -a`                                                    #
+#       - displays all created docker containers, running or not        #
+#   - `docker-compose down`                                             #
+#       - stops and removes all docker containers running               #
+#           in the background                                           #
+#   - `docker-compose down -v`                                          #
+#       - stops and removes all docker containers running               #
+#           in the background and removes stored volumns                #
+#   - `docker-compose down --rmi all`                                   #
+#       - command to stop and remove all docker containers, both        #
+#           running and not running                                     #
+#-----------------------------------------------------------------------#
 
 version: "3.1"
 services:
@@ -37,5 +95,23 @@ services:
       POSTGRES_PASSWORD: actix
       POSTGRES_USER: actix
       POSTGRES_DB: actix
+      PG.USER: actix
+      PG.PASSWORD: actix
+      PG.DBNAME: actix
+      PG.HOST: 0.0.0.0
+      PG.PORT: 5432
     ports:
       - 5432:5432
+    volumes:
+      - ./docker/db/database.sql:/docker-entrypoint-initdb.d/database.sql
+  actix-server:
+    build: 
+      context: .
+      dockerfile: ./docker/web/Dockerfile
+    restart: always
+    volumes:
+      - .:/usr/src/app
+    ports:
+      - 3001:80
+    depends_on:
+      - postgres

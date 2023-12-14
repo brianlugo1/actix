@@ -7,14 +7,14 @@ pub struct Status {
     pub message: String,
 }
 
-#[derive(Serialize, Deserialize, PostgresMapper)]
+#[derive(Serialize, Deserialize, PostgresMapper, Clone)]
 #[pg_mapper(table="todo_list")]
 pub struct TodoList {
     pub id: i32,
     pub title: String,
 }
 
-#[derive(Serialize, Deserialize, PostgresMapper)]
+#[derive(Serialize, Deserialize, PostgresMapper, Clone)]
 #[pg_mapper(table="todo_item")]
 pub struct TodoItem {
     pub id: i32,
@@ -25,6 +25,11 @@ pub struct TodoItem {
 
 #[derive(Deserialize)]
 pub struct CreateTodoList {
+    pub title: String,
+}
+
+#[derive(Deserialize)]
+pub struct CreateTodoItem {
     pub title: String,
 }
 
